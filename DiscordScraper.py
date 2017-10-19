@@ -6,7 +6,7 @@ import re
 client = discord.Client()
 
 
-admin_ids = ['225119587392421888']	#currently, it only works with one admin id.
+admin_ids = ['INSERT ADMIN ID HERE']	#currently, it only works with one admin id.
 									#It will be changed in the future to support messaging multiple people
 	
 
@@ -67,7 +67,7 @@ async def on_message(message):
 
 	try:
 		if type(message.author) == discord.Member:
-			logMessage(message, '368219345806950400')
+			logMessage(message, 'INSERT INTRODUCTION CHANNEL ID HERE')
 	except:
 		print('There was an error somewhere.\n Message id: ' + message.id)
 		await messageAdmins('There was an error somewhere.\n Message id: ' + message.id)
@@ -84,6 +84,6 @@ message_file = open("messages.csv", 'a')
 csvwriter = csv.writer(message_file)
 print("Opened messages.csv to append")
  
-client.run('MzY3NDA0MzI2MTg1OTkyMTkz.DL8TNg.4wwh6qNd-poiMkLHNEM0uxd065A')		
+client.run('INSERT BOT ID HERE')		
 
 
