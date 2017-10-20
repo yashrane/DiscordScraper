@@ -11,7 +11,7 @@ csvToxicTrain = csv.writer(toxicTrain)
 with open('messages.csv') as messages:
     csvMessages = csv.reader(messages)
     for row in csvMessages:
-        print(row[3])
+        print("\n" + row[3] + "\n")
         if(count >= line):
             Toxicity = input('t for toxic, n for not toxic, s for skip, q to quit: ')
             if Toxicity == 'q':
