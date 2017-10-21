@@ -8,12 +8,13 @@ save_line = open('line.txt', 'w')
 count = 0
 toxicTrain = open('toxicTrain.csv', 'a')
 csvToxicTrain = csv.writer(toxicTrain)
-with open('messages.csv') as messages:
+while True:
+    messages = open('messages.csv')
     csvMessages = csv.reader(messages)
     for row in csvMessages:
-        print("\n" + row[3] + "\n")
         if(count >= line):
-            Toxicity = input('t for toxic, n for not toxic, s for skip, q to quit: ')
+            print("\n>>\t" + row[3] + "\n")
+            Toxicity = input('t for toxic, n for not toxic, u to undo, s for skip, q to quit: ')
             if Toxicity == 'q':
                 save_line.write(str(count))
                 print('Saving at line ' + str(count))
@@ -22,5 +23,25 @@ with open('messages.csv') as messages:
                 csvToxicTrain.writerow((row[3], 't'))
             elif Toxicity == 'n':
                 csvToxicTrain.writerow((row[3], 'n'))
+            elif Toxicity == 'u':
+                line = count - 1
+                count = 0
+                toxicTrain.close()
+                #Rewrite the file such that the last line is popped
+                f = open('toxicTrain.csv', 'r')
+                lines = f.readlines()
+                lines = lines[:-1]
+                f.close()
+                f = open('toxicTrain.csv', 'w')
+                for lin in lines:
+                    f.write(lin)
+                f.close()
+                #Reopen file so that it can be appended to from the undoed line
+                toxicTrain = open('toxicTrain.csv', 'a')
+                csvToxicTrain = csv.writer(toxicTrain)
+                messages.close()
+                break
+        
         count = count + 1
-
+    if(Toxicity != 'u'):
+        break
