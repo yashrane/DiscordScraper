@@ -2,7 +2,7 @@ import csv
 import string
 from collections import OrderedDict
 from operator import itemgetter
-rmvpunc = str.maketrans('','','.,")(}{][/?><~=+-_;:!@#$%^&`*')
+rmvpunc = str.maketrans('','','.,")(}{][/?><~=+-_;\':!@#$%^&`*')
 
 def split_line(text, dic):
 	words = text.split()
