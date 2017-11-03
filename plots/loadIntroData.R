@@ -90,3 +90,4 @@ colnames(data) <- c("School", "Year", "Major", "ReasonJoin", "HowFound")
 
 #writes all unique majors to a csv file so that they can be categorized by hand
 write.csv(unique(data$Major), './lib/majors.csv')
+

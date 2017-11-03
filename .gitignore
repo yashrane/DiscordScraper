@@ -8,6 +8,11 @@ __pycache__/
 *.csv
 *.txt
 
+# R extensions
+.RData
+.Rhistory
+*.Rproj
+
 # Distribution / packaging
 .Python
 env/
@@ -101,3 +106,4 @@ ENV/
 
 # mypy
 .mypy_cache/
+.Rproj.user
