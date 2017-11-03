@@ -14,7 +14,7 @@ admin_ids = ['INSERT ADMIN ID HERE']	#currently, it only works with one admin id
 #returns a tuple with scraped info
 def parseIntroduction(introduction):
 	clean_intro = removeTrailingWhitespace(introduction)
-	pattern = re.compile(r'2.(.+)\/(.+)\/(.+)\s3.(.+)\s4.(.+)')
+	pattern = re.compile(r'2.(.+)[,\/-](.+)[,\/-](.+)\s3.(.+)\s4.(.+)')
 	result = pattern.search(clean_intro)
 	if result is not None:
 		return result.groups()
