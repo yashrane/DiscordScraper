@@ -16,8 +16,8 @@ users = merge(x=data, y=majors, by = "Major", all.x = TRUE)
 year_and_major_plot <- ggplot(data=users, aes(x=Year)) + 
                         geom_bar(aes(y=..count.., fill=Category))
 
-major_and_found_plot <- ggplot(data=users, aes(x=Category)) + 
-                        geom_bar(aes(y=..count.., fill=HowFound))
+major_plot <- ggplot(data=users, aes(x=Category)) + 
+                        geom_bar(aes(y=..count..))
 
 year_and_found_plot <- ggplot(data=users, aes(x=Year)) +
                         geom_bar(aes(y=..count.., fill=HowFound)) +
