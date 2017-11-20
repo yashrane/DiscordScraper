@@ -1,4 +1,4 @@
-setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
+#setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
 library("stringr")
 
 
@@ -68,26 +68,38 @@ cleanFound <- function(string){
   
   #edge cases
   found <- str_replace_all(found, "redddit", "reddit")
+  found <- str_replace_all(found, "wechat", "facebook")
   found <- str_replace_all(found, "roommate", "friend")
   found <- str_replace_all(found, "\\(edited\\)", "")
+  
+  found <- str_replace_all(found, "none given", "other")
+  found <- str_replace_all(found, "google", "other")
+  found <- str_replace_all(found, "previous user", "other")
   
   return(found)
 }
 
 
 
-#read data from the file
-data = read.csv('./lib/introductions.csv')
 
-#cleans the data
-data[1] <- lapply(data[1], cleanYearAndSchool)
-data[2] <- lapply(data[2], cleanYearAndSchool)
-data[3] <- lapply(data[3], cleanMajor)
-data[5] <- lapply(data[5], cleanFound)
+get_intro_data <- function(){
+  #read data from the file
+  data = read.csv('./lib/introductions.csv')
+  
+  #cleans the data
+  data[1] <- lapply(data[1], cleanYearAndSchool)
+  data[2] <- lapply(data[2], cleanYearAndSchool)
+  data[3] <- lapply(data[3], cleanMajor)
+  data[5] <- lapply(data[5], cleanFound)
+  
+  #give the data better column names
+  colnames(data) <- c("School", "Year", "Major", "ReasonJoin", "HowFound")
+  
+  return(data)
+}
 
-#give the data better column names
-colnames(data) <- c("School", "Year", "Major", "ReasonJoin", "HowFound")
+
 
 #writes all unique majors to a csv file so that they can be categorized by hand
-write.csv(unique(data$Major), './lib/majors.csv')
+#write.csv(unique(data$Major), './lib/majors.csv')
 
