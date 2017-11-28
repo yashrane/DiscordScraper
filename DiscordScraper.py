@@ -30,10 +30,12 @@ def logMessage(message, introduction):
 
 	#logs data to introduction.csv if it comes from the introduction channel
 	if message.channel.id == introduction:
-		intro_data = parseIntroduction(message.clean_content)
-		if intro_data is not None:
-			print(intro_data)
-			intro_file.writerow(intro_data)
+		#intro_data = parseIntroduction(message.clean_content)
+		#if intro_data is not None:
+		
+		#parsing code has been removed so that the code will not crash anymore
+		print(intro_data)
+		intro_file.writerow(intro_data)
 			
 	#logs data from all other channels to messages.csv
 	else:
