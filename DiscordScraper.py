@@ -2,6 +2,8 @@ import discord
 import asyncio
 import csv
 import re
+from datetime import datetime
+from datetime import timedelta
 
 client = discord.Client()
 
@@ -62,18 +64,21 @@ async def on_ready():
 	print(client.user.name)
 	print(client.user.id)
 	print('------')
-    await client.change_presence(status=discord.Status.invisible) 
+	await client.change_presence(status=discord.Status.invisible) 
 
 #when a message is sent or received
 @client.event
 async def on_message(message):
 
+	if message.timestamp - last_reminder > timedelta(days=1):
+		last_reminder = message.timestamp
+		await messageAdmins("The bot is still up! - " + str(last_reminder))
 	try:
 		if type(message.author) == discord.Member:
 			logMessage(message, 'INSERT INTRODUCTION CHANNEL ID HERE')
 	except:
 		print('There was an error somewhere.\n Message id: ' + message.id)
-		await messageAdmins('There was an error somewhere.\n Message id: ' + message.id)
+#		await messageAdmins('There was an error somewhere.\n Message id: ' + message.id)
 	
 		
 		
@@ -86,6 +91,7 @@ print('opened introductions.csv to append')
 message_file = open("messages.csv", 'a')
 csvwriter = csv.writer(message_file)
 print("Opened messages.csv to append")
+last_reminder = datetime.now()
  
 client.run('INSERT BOT ID HERE')		
 
