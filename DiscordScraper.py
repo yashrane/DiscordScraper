@@ -69,7 +69,7 @@ async def on_ready():
 #when a message is sent or received
 @client.event
 async def on_message(message):
-
+	global last_reminder
 	if message.timestamp - last_reminder > timedelta(days=1):
 		last_reminder = message.timestamp
 		await messageAdmins("The bot is still up! - " + str(last_reminder))

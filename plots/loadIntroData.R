@@ -14,8 +14,8 @@ cleanYearAndSchool <- function(string){
   #Edge Cases
   temp <- str_replace_all(temp, "(ls|l&s)", "ucsb")
   temp <- str_replace_all(temp, "2017", "4")
-  temp <- str_replace_all(temp, "1st", "1")
   temp <- str_replace_all(temp, "sixmonths", "4")
+  
   
   return(temp)
 }
@@ -92,8 +92,12 @@ get_intro_data <- function(){
   data[3] <- lapply(data[3], cleanMajor)
   data[5] <- lapply(data[5], cleanFound)
   
+  data$Year[data$Year == ""] <- NA #annoying edge case
+  
   #give the data better column names
-  colnames(data) <- c("School", "Year", "Major", "ReasonJoin", "HowFound")
+#  colnames(data) <- c("School", "Year", "Major", "ReasonJoin", "HowFound")
+  
+  data = na.omit(data)
   
   return(data)
 }
