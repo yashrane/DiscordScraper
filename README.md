@@ -1,4 +1,4 @@
-#DiscordScraper
+# DiscordScraper
 This is a data collection and analysis script written for UCSB's discord server. Data collection was done using the discord.py module. The analysis can be split into two parts: a toxicity predictor and demographic/message data visualizations.
 
 ## Toxicity Predictions
