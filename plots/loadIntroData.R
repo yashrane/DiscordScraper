@@ -5,9 +5,14 @@ library("stringr")
 
 
 
-#Function that cleans strings from the year and school columns
-#year and school had similar problems with them, so it is easier to put them both into the same function
+#' cleans Strings from the Year and School Columns
+#' should be used with lapply
+#' @param string the string to be cleaned
+#' @return the cleaned string
+#' @noRd
 cleanYearAndSchool <- function(string){
+  
+  #year and school had similar problems with them, so it is easier to put them both into the same function
   temp <- tolower(string)
   temp <- str_replace_all(temp, "[\\s()]", "")#removes whitespace and parenthesis
   
@@ -22,7 +27,11 @@ cleanYearAndSchool <- function(string){
 
 
 
-#Function that cleans strings from the major column
+#' cleans Strings from the Major Column
+#' should be used with lapply
+#' @param string the string to be cleaned
+#' @return the cleaned string
+#' @noRd
 cleanMajor <- function(string){
   temp <- tolower(string)
   temp <- str_trim(temp)
@@ -50,11 +59,17 @@ cleanMajor <- function(string){
 
 
 
-#Function that cleans strings from the How Found column
+#' cleans Strings from the HowFound Column
+#' should be used with lapply
+#' @param string the string to be cleaned
+#' @return the cleaned string
+#' @noRd
 cleanFound <- function(string){
   found <- tolower(string)
   
-  #takes everything that contains replace, and substitutes replace for it
+  #' Helper function that checks replaces a string with word if that word exists somewhere in the string
+  #' @param replace the string to be replaced
+  #' @noRd
   simplify <- function(replace){
     return(ifelse(grepl(replace, found), replace, found))
   }
@@ -81,7 +96,8 @@ cleanFound <- function(string){
 
 
 
-
+#' Reads introductions.csv and returns a dataframe with the data already cleaned
+#' @return Clean dataframe of introduction data
 get_intro_data <- function(){
   #read data from the file
   data = read.csv('./lib/introductions.csv')
