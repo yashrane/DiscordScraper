@@ -1,6 +1,7 @@
 
 library(ggplot2)
-#setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
+library(forcats)
+setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
 
 
 
@@ -28,7 +29,7 @@ make_plot <- function(type_str){
   users <- make_user_data()
   
   if(identical(type_str, "major")){
-    major_plot <- ggplot(data=users, aes(x=Category)) + 
+    major_plot <- ggplot(data=users, aes(x=fct_infreq(Category, ordered=TRUE))) + 
       geom_bar(aes(y=..count.., fill=Category)) + 
       scale_fill_brewer(palette = "Set1")
     return(major_plot)
@@ -36,7 +37,7 @@ make_plot <- function(type_str){
   
   if(identical(type_str, "year/found")){
     year_and_found_plot <- ggplot(data=users, aes(x=Year)) +
-      geom_bar(aes(y=..count.., fill=HowFound))+
+      geom_bar(aes(y=..count.., fill=Found.From))+
       scale_fill_manual(values = c("#3b5998", "#009900", "#ffff00", "#993300", "#FF4500"))
       #scale_x_discrete(limits = rev(levels(users$Year)))  
       #coord_flip()

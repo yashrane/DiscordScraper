@@ -111,7 +111,7 @@ get_intro_data <- function(){
   data$Year[data$Year == ""] <- NA #annoying edge case
   
   #give the data better column names
-#  colnames(data) <- c("School", "Year", "Major", "ReasonJoin", "HowFound")
+  colnames(data) <- c("School", "Year", "Major", "ReasonJoin", "Found.From")
   
   data = na.omit(data)
   
