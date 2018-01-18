@@ -1,23 +1,17 @@
-setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
+#setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
 library('ggplot2')
 library('lubridate')
 library('dplyr')
 library('stringr')
 
 
-messages = read.csv('../messages.csv', stringsAsFactors = FALSE)
 
 
 
-#format string to parse the timestamps with
-#Only keeping precision to the minute
-time_format <- "%F %H:%M"
 
-date1 <- as.Date("2017-10-12")
-date2 <- as.Date("2017-10-14")
 
-#converts the timestamp column to time objects
-messages$Timestamp <- strptime(x=messages$Timestamp, format = time_format)
+
+
 
 #test <- messages[messages$Timestamp > date1 & messages$Timestamp < date2,]
 #messages$Month <- month(messages$Timestamp)
@@ -66,13 +60,73 @@ make_role_df <- function(role_col, keep_roles){
   return(role_df)
 }
 
-role_df <- make_role_df(messages$Roles, c('Members','Gauchito', 'Regular'))
+load_message_data <- function(){
+  messages = read.csv('./lib/messages.csv', stringsAsFactors = FALSE)
+  
+  #format string to parse the timestamps with
+  #Only keeping precision to the minute
+  time_format <- "%F %T"
+  
+  #converts the timestamp column to time objects
+  messages$Timestamp <- with_tz(strptime(x=messages$Timestamp, format = time_format, tz="UTC"), "America/Los_Angeles")
+#  messages$Timestamp <- strptime(x=messages$Timestamp, format = time_format)
+  
+  role_df <- make_role_df(messages$Roles, c('Members','Gauchito', 'Regular'))
+  messages <- merge(messages, role_df,by="row.names")
+  
+  return(messages)
+}
 
-#message_plot <- ggplot(data=messages, aes(x=Timestamp)) + 
-#  geom_line(stat='count')  
-#message_plot
 
 
+#we want 3 or 4 views: overarching, weekly/monthly, daily
+make_message_graphs <- function(view){
+  if(!exists("messages")){
+    messages <- load_message_data()
+  }
+  
+  if(identical(view, "Overview")){
+    message_plot <- ggplot(data=messages, aes(x=round_date(Timestamp, unit = "day"))) + 
+      geom_line(data=messages[messages$Gauchito, ], stat='count', aes(colour = "Freshman"))  +
+      geom_line(stat='count', aes(colour = "Everyone")) +
+      scale_color_manual(breaks = c("Everyone", "Freshman"), values = c("black", "red"))+
+      labs(title = "Messages Over Time in UCSB Friendos", x ="Time", y="# of Messages") + 
+      theme_gray(base_size = 20)+theme(legend.title = element_blank())
+  }
+  
+  if(identical(view, "Day")){
+   # message_plot <- ggplot(data=messages, aes(x=hour(Timestamp))) + 
+   #   geom_bar(aes(y=..count..)) +
+   #   labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Hour", y="# of Messages") + 
+   #   theme_gray(base_size = 20)
+    
+    message_plot <- ggplot(data=messages, aes(x=hour(Timestamp))) + 
+     geom_line(stat='count') +
+     labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Hour", y="# of Messages") + 
+     theme_gray(base_size = 20)
+  }
+  
+  if(identical(view, "Week")){
+    message_plot <- ggplot(data=messages, aes(x=ordered(wday(Timestamp)), fill=ordered(wday(Timestamp)))) + 
+      geom_bar(aes(y=..count..)) +
+      scale_x_discrete(breaks = c(1,2,3,4,5,6,7), labels=c("Sun","Mon","Tues","Wed","Thurs", "Fri", "Sat")) +
+      scale_fill_manual(values=c("gold", "royalblue1","gold", "royalblue1","gold", "royalblue1","gold"))+
+      labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Day", y="# of Messages") + 
+      theme_gray(base_size = 20) + theme(legend.position = "none")
+  }
+  
+  return(message_plot)
+}
+
+messages <- load_message_data()
+
+'message_plot <- ggplot(data=messages, aes(x=round_date(Timestamp, unit = "day"))) + 
+  geom_line(data=messages[messages$Gauchito, ], stat="count", aes(colour = "Freshman"))  +
+  geom_line(stat="count", aes(colour = "Everyone")) +
+  scale_color_manual(breaks = c("Everyone", "Freshman"), values = c("black", "red"))+
+  labs(title = "Messages Per Day in UCSB Friendos", x ="Day", y="# of Messages") + 
+  theme_gray(base_size = 20)+theme(legend.title = element_blank())
+message_plot'
 
 
 

@@ -26,7 +26,7 @@ def parseIntroduction(introduction):
 def removeTrailingWhitespace(text):
 	pattern = re.compile(r'([ ]+)\s')
 	return str(pattern.sub('\n', text))
-	
+
 #logs a message from all channels except those in the blacklist
 def logMessage(message, introduction):
 
@@ -36,8 +36,8 @@ def logMessage(message, introduction):
 		#if intro_data is not None:
 		
 		#parsing code has been removed so that the code will not crash anymore
-		print(intro_data)
-		intro_file.writerow(intro_data)
+		#print(intro_data)
+		#intro_file.writerow(intro_data)
 			
 	#logs data from all other channels to messages.csv
 	else:
