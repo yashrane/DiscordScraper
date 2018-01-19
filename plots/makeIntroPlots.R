@@ -3,8 +3,6 @@ library(ggplot2)
 library(forcats)
 #setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
 
-
-
 make_user_data <- function(){
   if(!exists("get_intro_data", mode = "function"))
     source("loadIntroData.R")
@@ -32,22 +30,22 @@ make_plot <- function(type_str){
     major_plot <- ggplot(data=users, aes(x=fct_infreq(Category, ordered=TRUE))) + 
       geom_bar(aes(y=..count.., fill=Category)) + 
       scale_fill_brewer(palette = "Set1") +
-      labs(y="Count", x="Major") + 
-      theme_gray(base_size = 20)
+      labs(y="# of People", x="Major", title="Distribution of Majors in the UCSB Discord") + 
+      theme_gray(base_size = 25) + theme(legend.position = "none")
     return(major_plot)
   }
   
   if(identical(type_str, "year/found")){
     year_and_found_plot <- ggplot(data=users, aes(x=Year)) +
       geom_bar(aes(y=..count.., fill=Found.From))+
+      scale_x_discrete(breaks = c('1','2','3','4','5','g'), labels=c("1","2","3","4","5", "Grad")) +
       scale_fill_manual(values = c("#3b5998", "#009900", "#ffff00", "#993300", "#FF4500")) +
       #scale_x_discrete(limits = rev(levels(users$Year)))  
       #coord_flip()
-      theme_gray(base_size = 20)
+      labs(y="# of People", title="Distribution of Class Years in the UCSB Discord")+
+      theme_gray(base_size = 25)
     return(year_and_found_plot)
   }
-  
-  
   
 }
 

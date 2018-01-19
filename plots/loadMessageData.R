@@ -90,8 +90,8 @@ make_message_graphs <- function(view){
       geom_line(data=messages[messages$Gauchito, ], stat='count', aes(colour = "Freshman"))  +
       geom_line(stat='count', aes(colour = "Everyone")) +
       scale_color_manual(breaks = c("Everyone", "Freshman"), values = c("black", "red"))+
-      labs(title = "Messages Over Time in UCSB Friendos", x ="Time", y="# of Messages") + 
-      theme_gray(base_size = 20)+theme(legend.title = element_blank())
+      labs(title = "Messages Over Time in the UCSB Discord", x ="Time", y="# of Messages") + 
+      theme_gray(base_size = 25)+theme(legend.title = element_blank())
   }
   
   if(identical(view, "Day")){
@@ -100,10 +100,10 @@ make_message_graphs <- function(view){
    #   labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Hour", y="# of Messages") + 
    #   theme_gray(base_size = 20)
     
-    message_plot <- ggplot(data=messages, aes(x=hour(Timestamp))) + 
+    message_plot <- ggplot(data=messages, aes(x=hour(Timestamp), colour="red")) + 
      geom_line(stat='count') +
-     labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Hour", y="# of Messages") + 
-     theme_gray(base_size = 20)
+     labs(title = "Messages Throughout a Day in the UCSB Discord", x ="Hour", y="# of Messages") + 
+     theme_gray(base_size = 25) + theme(legend.position = "none")
   }
   
   if(identical(view, "Week")){
@@ -111,23 +111,21 @@ make_message_graphs <- function(view){
       geom_bar(aes(y=..count..)) +
       scale_x_discrete(breaks = c(1,2,3,4,5,6,7), labels=c("Sun","Mon","Tues","Wed","Thurs", "Fri", "Sat")) +
       scale_fill_manual(values=c("gold", "royalblue1","gold", "royalblue1","gold", "royalblue1","gold"))+
-      labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Day", y="# of Messages") + 
-      theme_gray(base_size = 20) + theme(legend.position = "none")
+      labs(title = "Messages Throughout a Day in the UCSB Discord", x ="Day", y="# of Messages") + 
+      theme_gray(base_size = 25) + theme(legend.position = "none")
   }
   
   return(message_plot)
 }
 
 messages <- load_message_data()
-
-'message_plot <- ggplot(data=messages, aes(x=round_date(Timestamp, unit = "day"))) + 
-  geom_line(data=messages[messages$Gauchito, ], stat="count", aes(colour = "Freshman"))  +
-  geom_line(stat="count", aes(colour = "Everyone")) +
-  scale_color_manual(breaks = c("Everyone", "Freshman"), values = c("black", "red"))+
-  labs(title = "Messages Per Day in UCSB Friendos", x ="Day", y="# of Messages") + 
-  theme_gray(base_size = 20)+theme(legend.title = element_blank())
-message_plot'
-
+'
+message_plot <- ggplot(data=messages, aes(x=hour(Timestamp), colour="red")) + 
+     geom_line(stat="count") +
+labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Hour", y="# of Messages") + 
+theme_gray(base_size = 20)
+message_plot
+'
 
 
 # TODO: make a plot showing how active the chat is over time
