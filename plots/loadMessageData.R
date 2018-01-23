@@ -6,13 +6,6 @@ library('stringr')
 
 
 
-
-
-
-
-
-
-
 #test <- messages[messages$Timestamp > date1 & messages$Timestamp < date2,]
 #messages$Month <- month(messages$Timestamp)
 #messages$Day <- day(messages$Timestamp)
