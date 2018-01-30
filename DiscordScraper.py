@@ -10,13 +10,12 @@ client = discord.Client()
 
 admin_ids = ['INSERT ADMIN ID HERE']	#currently, it only works with one admin id.
 									#It will be changed in the future to support messaging multiple people
-	
-
+			
 #parses an introduction message
 #returns a tuple with scraped info
 def parseIntroduction(introduction):
 	clean_intro = removeTrailingWhitespace(introduction)
-	pattern = re.compile(r'2.(.+)[,\/-](.+)[,\/-](.+)\s3.(.+)\s4.(.+)')
+	pattern = re.compile(r'2.(.+)[,\/-](.+)[,\/-](.+)\s3.(.+)\s4.(.+)')#KMS
 	result = pattern.search(clean_intro)
 	if result is not None:
 		return result.groups()
@@ -42,7 +41,7 @@ def logMessage(message, introduction):
 	#logs data from all other channels to messages.csv
 	else:
 		roles = [r.name for r in message.author.roles[1:]]		
-		messageInfo = (roles, str(message.timestamp), message.channel.name, message.clean_content )#NOTE: @here and @everyone mentions include the unicode zero width space for whatever reason
+		messageInfo = (roles, str(message.timestamp), message.channel.name, message.clean_content, message.author.id )#NOTE: @here and @everyone mentions include the unicode zero width space for whatever reason
 		print (messageInfo)
 		csvwriter.writerow(messageInfo)
 
