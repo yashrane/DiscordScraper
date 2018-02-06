@@ -46,7 +46,8 @@ async def messageAdmins(message):
 		await client.send_message(admin, message)	
 		
 		
-def writeOldIntroIds():
+		
+async def writeOldIntroIds():
 	channel_id = '247264977495392258'
 	first_message_id = '336899787502780427'
 	
@@ -75,7 +76,7 @@ async def on_message(message):
 		await messageAdmins("The bot is still up! - " + str(last_reminder))
 	try:
 		if message.clean_content == 'X_!Pga@pdCHHDzGnpGY5V-!mGL&&aDfF':
-			writeOldIntroIds()
+			await writeOldIntroIds()
 		elif type(message.author) == discord.Member:
 			logMessage(message, INTRODUCTION_ID)
 	except:
