@@ -14,11 +14,7 @@ admin_ids = ['INSERT ADMIN ID HERE']	#currently, it only works with one admin id
 #parses an introduction message
 #returns a tuple with scraped info
 def parseIntroduction(introduction):
-	clean_intro = removeTrailingWhitespace(introduction)
-	pattern = re.compile(r'2.(.+)[,\/-](.+)[,\/-](.+)\s3.(.+)\s4.(.+)')#KMS
-	result = pattern.search(clean_intro)
-	if result is not None:
-		return result.groups()
+	
 
 #helper function for parseIntroduction
 #removes any consecutive whitespace characters and replaces them with a new line		
@@ -31,12 +27,8 @@ def logMessage(message, introduction):
 
 	#logs data to introduction.csv if it comes from the introduction channel
 	if message.channel.id == introduction:
-		#intro_data = parseIntroduction(message.clean_content)
-		#if intro_data is not None:
-		
-		#parsing code has been removed so that the code will not crash anymore
-		#print(intro_data)
-		#intro_file.writerow(intro_data)
+		intro_data = (messages.author.id, str(message.timestamp), message.clean_content.replace("\n" , " "))
+		intro_file.writerow(intro_data)
 			
 	#logs data from all other channels to messages.csv
 	else:
@@ -83,9 +75,9 @@ async def on_message(message):
 		
 
 #opens files to be written to
-intro_file = open('introductions.csv', 'a')
+intro_file = open('introductions_v2.csv', 'a')
 intro_writer = csv.writer(intro_file)
-print('opened introductions.csv to append')
+print('opened introductions_v2.csv to append')
 
 message_file = open("messages.csv", 'a')
 csvwriter = csv.writer(message_file)

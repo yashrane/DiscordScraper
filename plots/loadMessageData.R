@@ -112,13 +112,13 @@ make_message_graphs <- function(view){
 }
 
 messages <- load_message_data()
-'
-message_plot <- ggplot(data=messages, aes(x=hour(Timestamp), colour="red")) + 
-     geom_line(stat="count") +
-labs(title = "Messages Throughout a Day in UCSB Friendos", x ="Hour", y="# of Messages") + 
-theme_gray(base_size = 20)
+
+
+message_plot <- ggplot(data=messages,aes(x=reorder(Channel, ..count..), y=..count..))+ 
+  geom_bar()+ 
+  coord_flip()
 message_plot
-'
+
 
 
 # TODO: make a plot showing how active the chat is over time
