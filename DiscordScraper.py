@@ -64,7 +64,7 @@ async def on_message(message):
 		await messageAdmins("The bot is still up! - " + str(last_reminder))
 	try:
 		if type(message.author) == discord.Member:
-			logMessage(message, 'INSERT INTRODUCTION CHANNEL ID HERE')
+			logMessage(message, INTRODUCTION_ID)
 	except:
 		print('There was an error somewhere.\n Message id: ' + message.id)
 #		await messageAdmins('There was an error somewhere.\n Message id: ' + message.id)
