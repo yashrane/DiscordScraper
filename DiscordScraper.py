@@ -1,3 +1,4 @@
+from values import *
 import discord
 import asyncio
 import csv
@@ -7,14 +8,11 @@ from datetime import timedelta
 
 client = discord.Client()
 
-
-admin_ids = ['INSERT ADMIN ID HERE']	#currently, it only works with one admin id.
+admin_ids = [ADMIN_ID]	#currently, it only works with one admin id.
 									#It will be changed in the future to support messaging multiple people
-			
-#parses an introduction message
-#returns a tuple with scraped info
-def parseIntroduction(introduction):
-	
+									
+									
+									
 
 #helper function for parseIntroduction
 #removes any consecutive whitespace characters and replaces them with a new line		
@@ -28,7 +26,7 @@ def logMessage(message, introduction):
 	#logs data to introduction.csv if it comes from the introduction channel
 	if message.channel.id == introduction:
 		intro_data = (messages.author.id, str(message.timestamp), message.clean_content.replace("\n" , " "))
-		intro_file.writerow(intro_data)
+		intro_writer.writerow(intro_data)
 			
 	#logs data from all other channels to messages.csv
 	else:
@@ -84,6 +82,4 @@ csvwriter = csv.writer(message_file)
 print("Opened messages.csv to append")
 last_reminder = datetime.now()
  
-client.run('INSERT BOT ID HERE')		
-
-
+client.run(BOT_ID)
