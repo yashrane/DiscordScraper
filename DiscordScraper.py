@@ -44,7 +44,18 @@ async def messageAdmins(message):
 		
 	for admin in admins:
 		await client.send_message(admin, message)	
-
+		
+		
+def writeOldIntroIds():
+	channel_id = '247264977495392258'
+	first_message_id = '336899787502780427'
+	
+	channel = get_channel(channel_id)
+	first_message = get_message(channel=channel, id=first_message_id)
+	async for message in client.logs_from(channel, limit=1000):
+		intro_data = (messages.author.id, str(message.timestamp), message.clean_content.replace("\n" , " "))
+		intro_writer.writerow(intro_data)
+	
 		
 #on startup
 @client.event
@@ -63,7 +74,9 @@ async def on_message(message):
 		last_reminder = message.timestamp
 		await messageAdmins("The bot is still up! - " + str(last_reminder))
 	try:
-		if type(message.author) == discord.Member:
+		if message.clean_content == 'X_!Pga@pdCHHDzGnpGY5V-!mGL&&aDfF':
+			writeOldIntroIds()
+		elif type(message.author) == discord.Member:
 			logMessage(message, INTRODUCTION_ID)
 	except:
 		print('There was an error somewhere.\n Message id: ' + message.id)
