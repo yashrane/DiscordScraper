@@ -14,7 +14,7 @@ for name in glob.glob('./*.csv'):
 		data = csv.reader(file)
 		#print("{} : {}".format(name, sum(1 for row in data if int(row[1]) > 25)))
 		for row in data:
-			if int(row[1]) > 25:
+			if int(row[1]) > 7:
 				add_to_dic(row[0])
 print(len(words), words)
 with open('dictionary.csv','w') as file:

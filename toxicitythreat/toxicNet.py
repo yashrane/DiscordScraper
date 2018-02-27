@@ -44,8 +44,8 @@ class characterwiseRNN(nn.Module):
 	def __init__(self, input_size, embedding_size, c_hidden):
 		super(characterwiseRNN, self).__init__()
 		self.hidden_size = c_hidden
-		self.lstm = nn.LSTM(input_size, c_hidden)
-		self.output = nn.Linear(c_hidden, embedding_size)
+		self.lstm = nn.LSTM(input_size, c_hidden,2)
+		self.output = nn.Linear(c_hidden*2, embedding_size)
 	def forward(self, input, hidden):
 		output, hidden = self.lstm(input, hidden)
 		output_embed = self.output(output)
@@ -58,8 +58,8 @@ class wordwiseRNN(nn.Module):
 	def __init__(self, embedding_size, output_size, w_hidden):
 		super(wordwiseRNN, self).__init__()
 		self.hidden_size = w_hidden
-		self.lstm = nn.LSTM(embedding_size,w_hidden)
-		self.output = nn.Linear(w_hidden, output_size)
+		self.lstm = nn.LSTM(embedding_size,w_hidden,2)
+		self.output = nn.Linear(w_hidden*2, output_size)
 		self.squash = nn.Sigmoid()
 	def forward(self, input, hidden):
 		output, hidden = self.lstm(input, hidden)
@@ -82,8 +82,8 @@ class embeds(nn.Module):
 #TODO GET VOCAB SIZE
 vocab_size = len(vocab)
 num_characters = 30
-c_hidden = 128
-w_hidden = 1024
+c_hidden = 50
+w_hidden = 200
 embedding_size = 200
 output_size = 6
 batch_size = 100
@@ -187,15 +187,19 @@ def is_correct(guess, target):
 		if((guess[i] < 0.5)^(target[i] < 0.5)) == True:
 			correct[i] = 1
 	return correct
-
+index = 1
+start = time.time()
 total_correct = [0,0,0,0,0,0]
 for row in validation_data:
 	target = Variable(torch.from_numpy(numpy.array([int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7])])).type(torch.FloatTensor))
 	guess, loss = train(row[1],target, 1)
 	yay = is_correct(guess, target)
+	if index % print_every == 0:
+		print('%d %d%% (%s) \n%s \n%s' % (index, index / 12000 * 100, timeSince(start), row[1], yay))
 	for i in range(6):
 		if yay[i] == 1:
 			total_correct[i] += 1
+	index += 1
 
 
 total = 12000
