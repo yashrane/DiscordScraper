@@ -7,6 +7,7 @@ import numpy
 import string
 import torch.nn as nn
 from torch.autograd import Variable
+import math
 
 #Load data
 labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
@@ -62,7 +63,7 @@ class wordwiseRNN(nn.Module):
 		self.squash = nn.Sigmoid()
 	def forward(self, input, hidden):
 		output, hidden = self.lstm(input, hidden)
-		output_final = self.squash(self.output(output))
+		output_final = self.squash(self.output(output)).view(6)
 		return output_final, hidden
 	def initHidden(self):
 		return (Variable(torch.zeros(1,1,self.hidden_size)),Variable(torch.zeros(1,1,self.hidden_size)))
@@ -103,8 +104,8 @@ criterion = nn.MSELoss()
 
 #Set rates of learning
 learning_rate = .005
-plot_every = 500 
-print_every = 1000
+#plot_every = 50 
+print_every = 2
 
 current_loss = 0
 losses = []
@@ -125,7 +126,6 @@ def to_tensor(s):
 	tensors = []
 	for word in words:
 		if word in vocab:
-			print(word, word_to_ix[word])
 			tensors.append(word_in_vocab_model(Variable(torch.LongTensor([word_to_ix[word]]))))
 		else:
 			character_tensor = Variable(lineToTensor(word))
@@ -135,7 +135,7 @@ def to_tensor(s):
 			tensors.append(output)
 	return tensors
 def train(input, categorization_tensor,num):
-	if num%batch_size == 0:
+	if (num-1)%batch_size == 0:
 		character_embedding.zero_grad()
 		sentence_model.zero_grad()
 		word_in_vocab_model.zero_grad()
@@ -145,8 +145,8 @@ def train(input, categorization_tensor,num):
 	tensor_list = to_tensor(input)
 	for tensor in tensor_list:
 		output, hidden = sentence_model(tensor.view(1,1,-1), hidden)
-	print(output)
-	print(categorization_tensor)
+	# print(output)
+	# print(categorization_tensor)
 	loss = criterion(output, categorization_tensor)
 	loss.backward()
 	if num%batch_size == 0:
@@ -163,16 +163,17 @@ start = time.time()
 character_embedding.zero_grad()
 sentence_model.zero_grad()
 word_in_vocab_model.zero_grad()
+
 for row in train_data:
 	target = Variable(torch.from_numpy(numpy.array([int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7])])).type(torch.FloatTensor))
 	guess, loss = train(row[1], target, iter)
 	current_loss += loss
 
-	if iter % plot_every == 0:
-		losses.append(current_loss/plot_every)
-		current_loss = 0
+	# if iter % plot_every == 0:
+	# 	losses.append(current_loss/plot_every)
+	# 	current_loss = 0
 	if iter % print_every == 0:
-		print('%d %d%% (%s) %.4f %s / %s %s' % (iter, iter / len(train_data) * 100, timeSince(start), loss, row[0], guess, target))
+		print('%d %d%% (%s) \nloss: %.4f \n%s \n%s %s' % (iter, iter / 83852 * 100, timeSince(start), loss, row[1], guess, target))
 	iter += 1
 #Save the networks
 torch.save(character_embedding.state_dict(), './character.pth')
@@ -197,6 +198,8 @@ for row in validation_data:
 			total_correct[i] += 1
 
 
-total = len(validation_data)
-for i in range(6):
-	print("{}: {}/{}, {}%".format(labels[i], total_correct[i], total, (total_correct/total)))
+total = 12000
+with open('results.txt', 'w') as results_file:
+	for i in range(6):
+		print("{}: {}/{}, {}%".format(labels[i], total_correct[i], total, (total_correct/total)))
+		results_file.write("{}: {}/{}, {}%\n".format(labels[i], total_correct[i], total, (total_correct/total)))
