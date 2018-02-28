@@ -23,7 +23,7 @@ for row in dictionary:
 	vocab.append(row[0])
 word_to_ix = {word: i for i, word in enumerate(vocab)}
 #character preprocessing
-chars = "abcdefghijklmnopqrstuvwqyz'-"
+chars = "abcdefghijklmnopqrstuvwqyz-"
 numerals = "1234567890"
 def letterToIndex(letter):
 	if letter not in chars:
@@ -45,13 +45,13 @@ class characterwiseRNN(nn.Module):
 		super(characterwiseRNN, self).__init__()
 		self.hidden_size = c_hidden
 		self.lstm = nn.LSTM(input_size, c_hidden,2)
-		self.output = nn.Linear(c_hidden*2, embedding_size)
+		self.output = nn.Linear(c_hidden, embedding_size)
 	def forward(self, input, hidden):
 		output, hidden = self.lstm(input, hidden)
 		output_embed = self.output(output)
 		return output_embed, hidden
 	def initHidden(self):
-		return (Variable(torch.zeros(1,1,self.hidden_size)),Variable(torch.zeros(1,1,self.hidden_size)))
+		return (Variable(torch.zeros(2,1,self.hidden_size)),Variable(torch.zeros(2,1,self.hidden_size)))
 
 #full sentence LSTM
 class wordwiseRNN(nn.Module):
@@ -59,14 +59,14 @@ class wordwiseRNN(nn.Module):
 		super(wordwiseRNN, self).__init__()
 		self.hidden_size = w_hidden
 		self.lstm = nn.LSTM(embedding_size,w_hidden,2)
-		self.output = nn.Linear(w_hidden*2, output_size)
+		self.output = nn.Linear(w_hidden, output_size)
 		self.squash = nn.Sigmoid()
 	def forward(self, input, hidden):
 		output, hidden = self.lstm(input, hidden)
 		output_final = self.squash(self.output(output)).view(6)
 		return output_final, hidden
 	def initHidden(self):
-		return (Variable(torch.zeros(1,1,self.hidden_size)),Variable(torch.zeros(1,1,self.hidden_size)))
+		return (Variable(torch.zeros(2,1,self.hidden_size)),Variable(torch.zeros(2,1,self.hidden_size)))
 
 #known words embedding
 class embeds(nn.Module):
@@ -82,11 +82,11 @@ class embeds(nn.Module):
 #TODO GET VOCAB SIZE
 vocab_size = len(vocab)
 num_characters = 30
-c_hidden = 50
-w_hidden = 200
-embedding_size = 200
+c_hidden = 32
+w_hidden = 256
+embedding_size = 128
 output_size = 6
-batch_size = 100
+batch_size = 50
 
 
 #Create models and losses
@@ -100,7 +100,7 @@ if len(files) != 0:
 	sentence_model.load_state_dict(torch.load('./sentence.pth'))
 	word_in_vocab_model.load_state_dict(torch.load('./embeds.pth'))
 
-criterion = nn.MSELoss()
+criterion = nn.MultiLabelSoftMarginLoss()
 
 #Set rates of learning
 learning_rate = .005
@@ -110,7 +110,7 @@ print_every = 2
 current_loss = 0
 losses = []
 
-rmvpunc = str.maketrans('','','!"#$%&()*+,./:;<=>?@[\]^_`{|}~')
+rmvpunc = str.maketrans('','','!"#$%\'&()*+,./:;<=>?@[\]^_`{|}~')
 import time
 def timeSince(since):
     now = time.time()
@@ -165,7 +165,7 @@ sentence_model.zero_grad()
 word_in_vocab_model.zero_grad()
 
 for row in train_data:
-	target = Variable(torch.from_numpy(numpy.array([int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7])])).type(torch.FloatTensor))
+	target = Variable(torch.from_numpy(numpy.array([abs(int(row[2])-1),abs(int(row[3])-1),abs(int(row[4])-1),abs(int(row[5])-1),abs(int(row[6])-1),abs(int(row[7])-1)])).type(torch.FloatTensor))
 	guess, loss = train(row[1], target, iter)
 	current_loss += loss
 
@@ -182,16 +182,19 @@ torch.save(word_in_vocab_model.state_dict(), './embeds.pth')
 
 #Evaluate the validation data
 def is_correct(guess, target):
-	correct = [0,0,0,0,0,0]
+	correct = [[0,0,0,0,0,0],
+				[0,0,0,0,0,0]]
 	for i in range(6):
-		if((guess[i] < 0.5)^(target[i] < 0.5)) == True:
-			correct[i] = 1
+		if((guess[i] < 0.5) and (target[i] < 0.5)) == True:
+			correct[0][i] = 1
+		elif((guess[i] > 0.5) and (target[i] > 0.5)) == True:
+			correct[1][i] = 1
 	return correct
 index = 1
 start = time.time()
 total_correct = [0,0,0,0,0,0]
 for row in validation_data:
-	target = Variable(torch.from_numpy(numpy.array([int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7])])).type(torch.FloatTensor))
+	target = Variable(torch.from_numpy(numpy.array([abs(int(row[2])-1),abs(int(row[3])-1),abs(int(row[4])-1),abs(int(row[5])-1),abs(int(row[6])-1),abs(int(row[7])-1)])).type(torch.FloatTensor))
 	guess, loss = train(row[1],target, 1)
 	yay = is_correct(guess, target)
 	if index % print_every == 0:
@@ -205,5 +208,8 @@ for row in validation_data:
 total = 12000
 with open('results.txt', 'w') as results_file:
 	for i in range(6):
-		print("{}: {}/{}, {}%".format(labels[i], total_correct[i], total, (total_correct/total)))
-		results_file.write("{}: {}/{}, {}%\n".format(labels[i], total_correct[i], total, (total_correct/total)))
+		print("{}: {}/{}, {}%".format(labels[0][i], total_correct[i], total, (total_correct/total)))
+		results_file.write("{}: {}/{}, {}%\n".format(labels[0][i], total_correct[i], total, (total_correct/total)))
+	for i in range(6):	
+		print("{}: {}/{}, {}%".format(labels[1][i], total_correct[i], total, (total_correct/total)))
+		results_file.write("{}: {}/{}, {}%\n".format(labels[1][i], total_correct[i], total, (total_correct/total)))

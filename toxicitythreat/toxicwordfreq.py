@@ -3,7 +3,7 @@ import string
 from collections import OrderedDict
 from operator import itemgetter
 types = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
-rmvpunc = str.maketrans('','','!"#$%&()*+,./:;<=>?@[\]^_`{|}~')
+rmvpunc = str.maketrans('','','!"#$%&()\'*+,./:;<=>?@[\]^_`{|}~')
 
 def split_line(text, dic):
 	words = text.split()
