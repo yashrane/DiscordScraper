@@ -5,6 +5,7 @@ import csv
 import re
 from datetime import datetime
 from datetime import timedelta
+from toxicitythreat.perspective import toxicity
 
 client = discord.Client()
 
@@ -20,6 +21,9 @@ def removeTrailingWhitespace(text):
 	pattern = re.compile(r'([ ]+)\s')
 	return str(pattern.sub('\n', text))
 
+	
+	
+	
 #logs a message from all channels except those in the blacklist
 def logMessage(message, introduction):
 
@@ -31,10 +35,17 @@ def logMessage(message, introduction):
 	#logs data from all other channels to messages.csv
 	else:
 		roles = [r.name for r in message.author.roles[1:]]		
-		messageInfo = (roles, str(message.timestamp), message.channel.name, message.clean_content, message.author.id )#NOTE: @here and @everyone mentions include the unicode zero width space for whatever reason
+		messageInfo = (roles, str(message.timestamp), message.channel.name, message.clean_content, message.author.id, toxicity(message.clean_content) )#NOTE: @here and @everyone mentions include the unicode zero width space for whatever reason
 		print (messageInfo)
 		csvwriter.writerow(messageInfo)
 
+		
+		
+		
+		
+		
+		
+		
 #messages people in the admin_ids list with the specified message, then closes the client	
 async def messageAdmins(message):
 	admins = []
