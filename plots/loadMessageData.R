@@ -1,9 +1,10 @@
-#setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
+setwd('C:/Users/yashr/Documents/Random Projects/DiscordScraper/plots')
 library('ggplot2')
 library('lubridate')
 library('dplyr')
 library('stringr')
-
+library(googlesheets)
+library('forcats')
 
 
 #test <- messages[messages$Timestamp > date1 & messages$Timestamp < date2,]
@@ -51,21 +52,47 @@ make_role_df <- function(role_col, keep_roles){
   colnames(role_df) <- keep_roles
   
   return(role_df)
+#  return(role_data)
+}
+
+
+load_from_gsheet <- function(token, key){
+#  gs_auth(token = token)
+#  gap <- gs_key(key)
+#  data <- gs_read(gap)
+  
+  uri = gs_webapp_auth_url(client_id = '877318179750-d7g9u88smnmcsrvcohngcp8n6l606j8r.apps.googleusercontent.com', 
+                     redirect_uri = 'http://www.google.com/robots.txt')
+  gs_webapp_get_token(uri)
+    
+  return(data)
+}
+
+createToken <- function(){
+  token <- gs_auth(cache=FALSE)
+  gd_token()
+  saveRDS(token, file = "googlesheets_token.rds")
 }
 
 load_message_data <- function(){
-  messages = read.csv('./lib/messages.csv', stringsAsFactors = FALSE)
+  messages = read.csv('./lib/messages.csv', stringsAsFactors = FALSE, 
+                      col.names = c("Roles", "Timestamp", "Channel", "Content", "User.ID", "Toxicity"))
+ # messages = load_from_gsheet('googlesheets_token.rds',"1-C4S0ergLT5BEjC1RhhtRtCx1S_yxdx9a2WgjfSOOjM" )[1:4]
+  
+  
   
   #format string to parse the timestamps with
   #Only keeping precision to the minute
   time_format <- "%F %T"
   
   #converts the timestamp column to time objects
-  messages$Timestamp <- with_tz(strptime(x=messages$Timestamp, format = time_format, tz="UTC"), "America/Los_Angeles")
+  messages$Timestamp <- with_tz(as.POSIXct(strptime(x=messages$Timestamp, format = time_format, tz="UTC")), "America/Los_Angeles")
 #  messages$Timestamp <- strptime(x=messages$Timestamp, format = time_format)
   
-  role_df <- make_role_df(messages$Roles, c('Members','Gauchito', 'Regular'))
-  messages <- merge(messages, role_df,by="row.names")
+  messages$User.ID = as.factor(messages$User.ID)
+  
+  role_df <- make_role_df(messages$Roles, c('Members','Gauchito', 'Regular'))#Look into using extract from tidyr for this
+  messages <- merge(messages, role_df,by="row.names", all.x = TRUE)
   
   return(messages)
 }
@@ -111,13 +138,109 @@ make_message_graphs <- function(view){
   return(message_plot)
 }
 
+
+plot_activity <- function(){
+  last_message <- messages[nrow(messages),]$Timestamp
+  past_day <- interval(last_message-ddays(), last_message)
+
+  activity <- messages %>% filter(Timestamp %within% past_day)
+  
+  message_plot <- ggplot(data=activity, aes(x=Timestamp, colour="red")) + 
+    geom_line(stat='count') +
+    labs(title = "Messages Throughout a Day in the UCSB Discord", x ="Hour", y="# of Messages") + 
+    theme_gray(base_size = 25) + theme(legend.position = "none")
+}
+
+usage_info<-function(){
+  reg_table <- messages %>% group_by(User.ID) %>% na.omit() %>%
+    summarize(count=n()/n_distinct(month(Timestamp)), IsReg = any(Regular), isMapachito = any(grepl("Mapachito", Roles))) 
+  
+  AddThreshold <- unlist(reg_table %>% filter(IsReg) %>% summarize(count=sum(count)/n()))
+  reg_table$NeedReg <- reg_table$count > AddThreshold
+  add_list <- reg_table %>% filter(!IsReg & NeedReg)
+  
+  RemoveThreshold <- unlist(reg_table  %>% summarize(count=sum(count)/n()))
+  kill_list <- reg_table %>% filter(IsReg & count < RemoveThreshold)
+  
+  info <- list("add"=add_list$User.ID, "remove"=kill_list$User.ID)
+  return(info)
+}
+
+
+interesting_user <- "285607618913894400"
 messages <- load_message_data()
 
+num_regulars <- messages %>% filter(Regular) %>% summarise(n_distinct(User.ID))
+average_regular <-  sum((!is.na(messages$User.ID)) & messages$Regular & !grepl(interesting_user, messages$User.ID)) / num_regulars/ n_distinct(month(messages$Timestamp))
 
-message_plot <- ggplot(data=messages,aes(x=reorder(Channel, ..count..), y=..count..))+ 
-  geom_bar()+ 
-  coord_flip()
-message_plot
+num_normals <- messages %>% filter(!Regular) %>% summarise(n_distinct(User.ID))
+average_normal <-  sum((!is.na(messages$User.ID)) & !messages$Regular)/num_normals/ n_distinct(month(messages$Timestamp))
+
+testplot <- ggplot(data=messages[!is.na(messages$User.ID) & !grepl(interesting_user, messages$User.ID),], 
+  aes(x=fct_lump(fct_infreq(User.ID), n=20), fill=Regular)) + 
+  stat_count() + geom_hline(yintercept = 1239) +
+   coord_flip()
+
+reg_table <- messages %>% group_by(User.ID) %>% na.omit() %>%
+  summarize(count=n()/n_distinct(month(Timestamp)), IsReg = any(Regular), isMapachito = any(grepl("Mapachito", Roles))) 
+
+#add if you talk more than the average regular
+AddThreshold <- unlist(reg_table %>% filter(IsReg) %>% summarize(count=sum(count)/n()))
+reg_table$NeedReg <- reg_table$count > AddThreshold
+add_list <- reg_table %>% filter(!IsReg & NeedReg)
+
+#Remove from regular if you talk less than the average person
+RemoveThreshold <- unlist(reg_table  %>% summarize(count=sum(count)/n()))
+kill_list <- reg_table %>% filter(IsReg & count < RemoveThreshold)
+
+
+testplot <- ggplot(reg_table %>% filter(User.ID != interesting_user)) +
+  geom_point(aes(x=User.ID, y=count, color=IsReg))+
+  geom_hline(yintercept = AddThreshold)+geom_hline(yintercept = RemoveThreshold)
+  
+
+#messages %>% group_by(User.ID, month(Timestamp)) %>% summarize(n())
+
+#-----------------------------------------------------
+#look at unique user ids before a date
+
+intros <-messages %>% 
+#  filter(Channel == 'introductions') %>% 
+  group_by(month(Timestamp), day(Timestamp)) %>% 
+  summarize(count=n(), Timestamp=max(Timestamp))
+ggplot(intros, aes(x=Timestamp, y=count))+geom_line()
+
+toxic <-messages %>% 
+  #  filter(Channel == 'introductions') %>% 
+  group_by(month(Timestamp), day(Timestamp)) %>% 
+  summarize(toxicity=mean(Toxicity, na.rm=T), Timestamp=max(Timestamp), n_users=n_distinct(User.ID))
+ggplot(toxic[!is.na(toxic$toxicity),], aes(x=Timestamp, y=toxicity))+geom_line()
+
+
+ggplot(messages, aes(Toxicity))+geom_histogram() #+ facet_wrap(~Channel)
+
+head(messages %>% filter(Toxicity > 0.75) %>% arrange(desc(Toxicity)))
+#-----------------------------------------------------
+
+#How to tell if someone is a regular or not?
+#find total messages by that user for the past month
+#compare that number against the average regular for the past month/average month
+#if higher, then they are regular
+
+#find the different between active regulars and inactive regulars
+
+#Create Some Kind of simple verification of admin, and only display the list of peeps to add and remvoe to 
+#those admins
+
+
+
+
+
+
+#message_plot <- ggplot(data=messages,aes(x=reorder(Channel, ..count..), y=..count..))+ 
+#  geom_bar()+ 
+#  coord_flip()
+#message_plot
 
 
 
