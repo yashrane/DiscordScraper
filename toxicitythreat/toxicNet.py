@@ -59,11 +59,12 @@ class wordwiseRNN(nn.Module):
 		super(wordwiseRNN, self).__init__()
 		self.hidden_size = w_hidden
 		self.lstm = nn.LSTM(embedding_size,w_hidden,2)
-		self.output = nn.Linear(w_hidden, output_size)
-		self.squash = nn.Sigmoid()
+		self.result = nn.Linear(w_hidden, output_size)
+		self.squash = nn.Softmax(dim=1)
 	def forward(self, input, hidden):
 		output, hidden = self.lstm(input, hidden)
-		output_final = self.squash(self.output(output)).view(6)
+		output = self.result(output).view(-1,2)
+		output_final = self.squash(output)
 		return output_final, hidden
 	def initHidden(self):
 		return (Variable(torch.zeros(2,1,self.hidden_size)),Variable(torch.zeros(2,1,self.hidden_size)))
@@ -82,10 +83,10 @@ class embeds(nn.Module):
 #TODO GET VOCAB SIZE
 vocab_size = len(vocab)
 num_characters = 30
-c_hidden = 32
-w_hidden = 256
+c_hidden = 128
+w_hidden = 512
 embedding_size = 128
-output_size = 6
+output_size = 12
 batch_size = 50
 
 
@@ -100,12 +101,12 @@ if len(files) != 0:
 	sentence_model.load_state_dict(torch.load('./sentence.pth'))
 	word_in_vocab_model.load_state_dict(torch.load('./embeds.pth'))
 
-criterion = nn.MultiLabelSoftMarginLoss()
+criterion = nn.CrossEntropyLoss()
 
 #Set rates of learning
 learning_rate = .005
 #plot_every = 50 
-print_every = 2
+print_every = 10
 
 current_loss = 0
 losses = []
@@ -165,7 +166,7 @@ sentence_model.zero_grad()
 word_in_vocab_model.zero_grad()
 
 for row in train_data:
-	target = Variable(torch.from_numpy(numpy.array([abs(int(row[2])-1),abs(int(row[3])-1),abs(int(row[4])-1),abs(int(row[5])-1),abs(int(row[6])-1),abs(int(row[7])-1)])).type(torch.FloatTensor))
+	target = Variable(torch.from_numpy(numpy.array([int(row[2]),int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7])])).type(torch.LongTensor))
 	guess, loss = train(row[1], target, iter)
 	current_loss += loss
 
@@ -173,7 +174,7 @@ for row in train_data:
 	# 	losses.append(current_loss/plot_every)
 	# 	current_loss = 0
 	if iter % print_every == 0:
-		print('%d %d%% (%s) \nloss: %.4f \n%s \n%s %s' % (iter, iter / 83852 * 100, timeSince(start), loss, row[1], guess, target))
+		print('%d %d%% (%s) \nloss: %.4f \n%s \n%s %s' % (iter, iter / 100000 * 100, timeSince(start), loss, row[1], guess, target))
 	iter += 1
 #Save the networks
 torch.save(character_embedding.state_dict(), './character.pth')
@@ -194,7 +195,7 @@ index = 1
 start = time.time()
 total_correct = [0,0,0,0,0,0]
 for row in validation_data:
-	target = Variable(torch.from_numpy(numpy.array([abs(int(row[2])-1),abs(int(row[3])-1),abs(int(row[4])-1),abs(int(row[5])-1),abs(int(row[6])-1),abs(int(row[7])-1)])).type(torch.FloatTensor))
+	target = Variable(torch.from_numpy(numpy.array(map(int,row[2:]))).type(torch.LongTensor))
 	guess, loss = train(row[1],target, 1)
 	yay = is_correct(guess, target)
 	if index % print_every == 0:
