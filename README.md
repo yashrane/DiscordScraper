@@ -38,6 +38,7 @@ Our dashboard was created using plot.ly's dash library for python. On the left s
 Looking at the distribution of class years, it's pretty clear that the chat is dominated by freshman, with almost twice as many freshman as any other group. This is reflected in some of our freshman-oriented channels, such as `#questions` and `#roommates-finder`, which are both dominated by incoming first years
 
 ## Conclusions
-Moving forward, there are a few improvement planned for this project. We want to integrate our dashboard straight into a Discord bot. This would let moderators view and interact with our analytics without ever having to leave the discord app, which would streamline the whole process. We also want to try different neural network architectures, such as a Bi-LSTM or attention models, to try to improve our accuracy.
+Moving forward, there are a few improvement planned for this project. We want to integrate our dashboard straight into a Discord bot. This would let moderators view and interact with our analytics without ever having to leave the discord app, which would streamline the whole process. We also want to try different neural network architectures, such as a Bi-LSTM or attention models, to try to improve our accuracy
+.
 While this project has come a long way since we started it in October 2017, there is still a lot of work that needs to be done before it is published and ready to use for a general audience. This being said, it has the potential to become a powerful and impactful tool in the years to come.
 
