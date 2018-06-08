@@ -18,13 +18,13 @@ We created an LSTM with both word embeddings (using word2vec) and character-wise
 </p>
 
 Our model was trained on the Google Jigsaw Toxicity data, taken from kaggle.com. We acheived an ROC AUC of 0.88. Google's state-of-the-art model recieved a score of 0.99, but considering that we don't have access to the same kind of resouces that Google does, our score is still impressive.
-(<p align="center">
+<p align="center">
 <img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/img/ROC.PNG">
 </p>
 
 
 ## Dashboard
-(<p align="center">
+<p align="center">
 <img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/img/dashboard.PNG">
 </p>
 
@@ -35,4 +35,4 @@ Our dashboard was created using plot.ly's dash library for python. On the left s
 <img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/img/Years.png">
 </p>
 
-Looking at the distribution of class years, it's pretty clear that the chat is dominated by freshman, with almost twice as many freshman as any other group. This is reflected in some of our freshman-oriented channels, such as #questions and #roommates-finder, which are both dominated by incoming first years
+Looking at the distribution of class years, it's pretty clear that the chat is dominated by freshman, with almost twice as many freshman as any other group. This is reflected in some of our freshman-oriented channels, such as `#questions` and `#roommates-finder`, which are both dominated by incoming first years
