@@ -1,27 +1,36 @@
 # DiscordScraper
-This is a data collection and analysis script written for UCSB's discord server. Data collection was done using the discord.py module. The analysis can be split into two parts: a toxicity predictor and demographic/message data visualizations.
+UCSB's Discord chat server has been growing quickly over the past year, and this rapid growth has made moderation harder and harder. We wanted to find a way to make managing the server easier, so we built a set of moderator tools.
+First, we created a Discord bot using the discord.py module to compile a record of all chat logs. Then, we designed a recurrent neural network to analyze the toxicity of these messages. Finally, we took the data collected from the bot, and the toxicity predictions from the RNN, and created a dashboard that moderators could use to manage and monitor the server.
 
-## Toxicity Predictions
-Written by Brian Lim with help from Kitty Fung
-
-WIP
-
-## Data Visualizations
-Written in R by Yash Rane
-
-#### Introduction Data
-Our scraper script outputs all introductions to a file named introductions.csv, with all names removed in order to preserve anonymity.Introductions came in all kinds of formats, so it was impossible to create a single regex pattern that could parse an introduction. Because of this, the code for loading in introduction data had to deal with a large number of edge cases, and no clean solution could be found. These cleaned introductions were loaded into a dataframe, and could then be accessed by the parts of the project that create plots.
-
+## Data Collection
+The discord.py module allows us to easily create a bot that scrapes each message that gets sent in the server and logs that message to a .csv file. This gives us a convinent way of organizing the data for later analysis. A sample data observation is shown below (toxicity score appended to data later)
 <p align="center">
-<img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/plots/img/major_plot.png">
+<img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/img/data_obs.png">
 </p>
 
-The majority of students here are studying some kind of science, but since there are more kinds of science majors, this is no surprise. Math (which includes things like Econ and Stats) and Humanities, on the other hand, are much higher than I initally expected. This is especially surprising for Math, since it encompasses the smallest number of majors.
 
+## Toxicity Analysis
+We created an LSTM with both word embeddings (using word2vec) and character-wise embeddings. Our network architecture is shown below.
 <p align="center">
-<img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/plots/img/year_and_found_from_plot.png">
+<img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/img/architecture.png">
 </p>
 
-Looking at the distribution of class years, it's pretty clear that the chat is dominated by freshman, with almost twice as many freshman as any other group. The vast majority of people found the discord through reddit, no doubt because it is permanantly pinned on the UCSB subreddit's front page. From this, I can resonably assume that our demographics resemble reddit's (2/3 Male). 
-Freshman also have the highest proportion of people who found the chat server either through a friend or through facebook.
+Our model was trained on the Google Jigsaw Toxicity data, taken from kaggle.com. We acheived an ROC AUC of 0.88. Google's state-of-the-art model recieved a score of 0.99, but considering that we don't have access to the same kind of resouces that Google does, our score is still impressive.
+(<p align="center">
+<img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/img/ROC.png">
+</p>
 
+
+## Dashboard
+(<p align="center">
+<img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/img/dashboard.png">
+</p>
+
+Our dashboard was created using plot.ly's dash library for python. On the left side, there are the introductions - information that a moderator could immediately act on. This is especially important to us that we display actionable data, since theres no point showing information that you can't do anything about. On the right side, we have the monitoring portion. This includes a graph of how active the server has been over the past day, and the average toxicity over the same time span.
+
+## Misc Data Visualizations
+<p align="center">
+<img src="https://raw.githubusercontent.com/yashrane/DiscordScraper/master/plots/img/Years.png">
+</p>
+
+Looking at the distribution of class years, it's pretty clear that the chat is dominated by freshman, with almost twice as many freshman as any other group. This is reflected in some of our freshman-oriented channels, such as #questions and #roommates-finder, which are both dominated by incoming first years

@@ -87,7 +87,7 @@ def notifications():
 
 	#add_list, remove_list = usage_info()
 	problem_users = ["Moose", "Oppen"]
-	new_users = ['Some 4chan troll', 'GreatGuy']
+	new_users = ['burnt', 'GreatGuy']
 	
 	
 	

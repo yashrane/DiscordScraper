@@ -123,3 +123,9 @@ get_intro_data <- function(){
 #writes all unique majors to a csv file so that they can be categorized by hand
 #write.csv(unique(data$Major), './lib/majors.csv')
 
+intros <- load_intro_data()
+library(ggplot2)
+p <- ggplot(intros) + geom_histogram(aes(x=Year), stat="count", fill='#7289DA')+
+  scale_x_discrete(labels=c("1" = "1", "2" = "2","3" = "3", "4"="4", "g"="Grad"))+
+  labs(title="Distribution of Class Years")
+p
